@@ -1,0 +1,20 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Configurar Netflame Estufa",
+        "description": "Ingresa las credenciales de tu estufa Netflame",
+        "data": {
+          "serial": "Número de serie",
+          "password": "Contraseña"
+        }
+      }
+    },
+    "error": {
+      "auth": "Error de autenticación - verifica el número de serie y contraseña"
+    },
+    "abort": {
+      "already_configured": "El dispositivo ya está configurado"
+    }
+  }
+}

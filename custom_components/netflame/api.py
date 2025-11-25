@@ -105,4 +105,3 @@ class NetflameApi:
             return datos_correctos[0].split("=", 1)[1].strip()
 
         return datos_correctos[0].strip()
-
