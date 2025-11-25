@@ -86,8 +86,23 @@ class NetflameApi:
     def get_alarmas(self):
         raw = self._post({"idOperacion": OP_ALARMAS})
 
-        # Try to return a short interpreted string if possible
-        for line in raw.split("\n"):
-            if "alarma" in line or "alarm" in line or "error" in line:
-                return line.strip()
-        return raw.strip()
+        # Separar por líneas
+        lines = [l.strip() for l in raw.split("\n") if l.strip()]
+
+        # Reproducir eliminarErrores() del JavaScript
+        datos_correctos = [l for l in lines if "error" not in l.lower()]
+
+        # Necesitamos al menos dos líneas limpias
+        if len(datos_correctos) < 2:
+            return None
+
+        # datos_correctos[1] debe ser "0"
+        if datos_correctos[1] != "0":
+            return None
+
+        # Obtener valor después de "=" en la primera línea correcta
+        if "=" in datos_correctos[0]:
+            return datos_correctos[0].split("=", 1)[1].strip()
+
+        return datos_correctos[0].strip()
+
