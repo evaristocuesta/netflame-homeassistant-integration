@@ -40,7 +40,7 @@ class NetflameTempSensor(CoordinatorEntity, SensorEntity):
         self.api = api
         self._entry = entry
         serial = entry.data.get("serial")
-        self._attr_name = f"Netflame {serial} Temperatura"
+        self._attr_name = f"Netflame {serial} Temperature"
         self._attr_unique_id = f"netflame_{serial}_temp"
 
     @property
@@ -51,14 +51,14 @@ class NetflameTempSensor(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, serial)},
             name=f"Netflame {serial}",
             manufacturer="Netflame",
-            model="Estufa de Pellets",
+            model="Pellet Stove",
             sw_version="1.0",
         )
 
     @property
     def native_value(self):
         """Return the temperature value."""
-        return self.coordinator.data.get("temperatura")
+        return self.coordinator.data.get("temperature")
 
 
 class NetflameAlarmaSensor(CoordinatorEntity, SensorEntity):
@@ -72,7 +72,7 @@ class NetflameAlarmaSensor(CoordinatorEntity, SensorEntity):
         self.api = api
         self._entry = entry
         serial = entry.data.get("serial")
-        self._attr_name = f"Netflame {serial} Alarma"
+        self._attr_name = f"Netflame {serial} Alarm"
         self._attr_unique_id = f"netflame_{serial}_alarms"
 
     @property
@@ -83,14 +83,14 @@ class NetflameAlarmaSensor(CoordinatorEntity, SensorEntity):
             identifiers={(DOMAIN, serial)},
             name=f"Netflame {serial}",
             manufacturer="Netflame",
-            model="Estufa de Pellets",
+            model="Pellet Stove",
             sw_version="1.0",
         )        
 
     @property
     def native_value(self):
         """Return the alarm value."""
-        alarmas = self.coordinator.data.get("alarmas")
-        if alarmas:
-            return alarmas.strip()
+        alarms = self.coordinator.data.get("alarms")
+        if alarms:
+            return alarms.strip()
         return None

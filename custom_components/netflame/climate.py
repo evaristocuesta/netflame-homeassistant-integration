@@ -48,7 +48,7 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
         self._attr_temperature_unit = UnitOfTemperature.CELSIUS
         self._attr_hvac_modes = [HVACMode.HEAT, HVACMode.OFF]
         self._attr_supported_features = ClimateEntityFeature.PRESET_MODE
-        self._attr_preset_modes = [f"Potencia {i}" for i in range(1, 10)]
+        self._attr_preset_modes = [f"Power {i}" for i in range(1, 10)]
 
     @property
     def device_info(self) -> DeviceInfo:
@@ -58,19 +58,19 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
             identifiers={(DOMAIN, serial)},
             name=f"Netflame {serial}",
             manufacturer="Netflame",
-            model="Estufa de Pellets",
+            model="Pellet Stove",
             sw_version="1.0",
         )
 
     @property
     def current_temperature(self):
         """Return the current temperature."""
-        return self.coordinator.data.get("temperatura")
+        return self.coordinator.data.get("temperature")
 
     @property
     def hvac_mode(self):
         """Return current HVAC mode."""
-        estado = self.coordinator.data.get("estado")
+        estado = self.coordinator.data.get("status")
         if estado in (0, 1):
             return HVACMode.OFF
         return HVACMode.HEAT
@@ -86,15 +86,15 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self):
         """Return current preset mode."""
-        potencia = self.coordinator.data.get("potencia")
+        potencia = self.coordinator.data.get("power")
         if potencia:
-            return f"Potencia {potencia}"
+            return f"Power {potencia}"
         return None
 
     async def async_set_preset_mode(self, preset_mode: str):
         """Set preset mode."""
         try:
-            nivel = int(preset_mode.replace("Potencia ", ""))
+            nivel = int(preset_mode.replace("Power ", ""))
         except Exception:
             return
         await self.hass.async_add_executor_job(self.api.set_potencia, nivel)

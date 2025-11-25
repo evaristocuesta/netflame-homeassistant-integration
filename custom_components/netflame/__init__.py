@@ -28,9 +28,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     async def _update():
         # All blocking calls run in executor
         status = await hass.async_add_executor_job(api.get_status)
-        alarmas = await hass.async_add_executor_job(api.get_alarmas)
-        # Merge alarmas into status dict
-        status["alarmas"] = alarmas
+        alarms = await hass.async_add_executor_job(api.get_alarms)
+        # Merge alarms into status dict
+        status["alarms"] = alarms
         return status
 
     coordinator = DataUpdateCoordinator(
@@ -49,7 +49,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
         "coordinator": coordinator,
     }
 
-    # Forward setups for platforms (correct HA API)
+    # Forward setups for platforms
     await hass.config_entries.async_forward_entry_setups(entry, ["climate", "sensor"])
 
     return True
