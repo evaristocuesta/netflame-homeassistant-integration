@@ -6,18 +6,16 @@ from homeassistant.data_entry_flow import FlowResult
 from .const import DOMAIN
 from .api import NetflameApi
 
-
 class NetflameFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
-
     VERSION = 1
 
     async def async_step_user(self, user_input=None) -> FlowResult:
         errors = {}
 
         if user_input is not None:
-            # Validar credenciales contactando con la API
             api = NetflameApi(user_input["serial"], user_input["password"])
             try:
+                # Validate by calling get_status in executor (blocking)
                 await self.hass.async_add_executor_job(api.get_status)
                 return self.async_create_entry(
                     title=f"Netflame {user_input['serial']}",
