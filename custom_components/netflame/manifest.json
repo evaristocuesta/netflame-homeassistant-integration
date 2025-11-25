@@ -1,6 +1,6 @@
 {
   "domain": "netflame",
-  "name": "Netflame Estufa",
+  "name": "Netflame Stove",
   "codeowners": ["@evaristocuesta"],
   "config_flow": true,
   "dependencies": [],

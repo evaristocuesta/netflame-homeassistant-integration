@@ -1,50 +1,50 @@
-# Netflame Estufa - Home Assistant Integration
+# Netflame Stove - Home Assistant Integration
 
-Integración de Home Assistant para controlar estufas de pellets Netflame.
+Home Assistant integration to control Netflame pellet stoves.
 
-## Características
+## Features
 
-- Control de encendido/apagado
-- Lectura de temperatura
-- Control de potencia (niveles 1-9)
-- Lectura de alarmas
-- Entity climático para modo HVAC y presets de potencia
-- Sensores para temperatura y alarmas
+- On/off control
+- Temperature reading
+- Power control (levels 1-9)
+- Alarm reading
+- Climate entity for HVAC mode and power presets
+- Sensors for temperature and alarms
 
-## Instalación
+## Installation
 
-### Vía HACS
+### Via HACS
 
-1. Abre HACS en tu instancia de Home Assistant
-2. Ve a "Integraciones"
-3. Busca "Netflame Estufa"
-4. Instala la integración
-5. Reinicia Home Assistant
+1. Open HACS in your Home Assistant instance
+2. Go to "Integrations"
+3. Search for "Netflame Stove"
+4. Install the integration
+5. Restart Home Assistant
 
-### Instalación manual
+### Manual Installation
 
-1. Clona este repositorio en tu carpeta `custom_components`:
+1. Clone this repository into your `custom_components` folder:
 ```bash
 git clone https://github.com/evaristocuesta/netflame-homeassistant-integration.git ~/.homeassistant/custom_components/netflame
 ```
 
-2. Reinicia Home Assistant
+2. Restart Home Assistant
 
-## Configuración
+## Configuration
 
-Necesitarás proporcionar:
-- **Serial**: Número de serie de tu estufa Netflame
-- **Contraseña**: Contraseña de acceso a la estufa
+You will need to provide:
+- **Serial**: Serial number of your Netflame stove
+- **Password**: Access password for the stove
 
-## Requisitos
+## Requirements
 
-- Home Assistant 2024.1.0 o superior
-- Conexión a Internet (la estufa se comunica con servidores en la nube)
+- Home Assistant 2024.1.0 or higher
+- Internet connection (the stove communicates with cloud servers)
 
 ## Codeowners
 
 - [@evaristocuesta](https://github.com/evaristocuesta)
 
-## Reporte de problemas
+## Issue Tracking
 
-Si encuentras problemas, por favor abre un issue en el [rastreador de problemas](https://github.com/evaristocuesta/netflame-homeassistant-integration/issues)
+If you encounter any issues, please open an issue in the [issue tracker](https://github.com/evaristocuesta/netflame-homeassistant-integration/issues)
