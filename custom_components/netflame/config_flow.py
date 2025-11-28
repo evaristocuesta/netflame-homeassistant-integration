@@ -29,8 +29,16 @@ class NetflameFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
             vol.Required("password"): str,
         })
 
+        # Provide placeholders so title/description from strings.json
+        # can be substituted dynamically (and to help detect translation issues)
+        placeholders = {
+            "device": "Netflame Stove",
+            "serial": (user_input or {}).get("serial", "")
+        }
+
         return self.async_show_form(
             step_id="user",
             data_schema=schema,
-            errors=errors
+            errors=errors,
+            description_placeholders=placeholders,
         )

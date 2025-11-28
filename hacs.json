@@ -1,5 +1,6 @@
 {
-  "name": "Netflame Estufa",
+  "name": "Netflame Stove",
+  "render_readme": true,
   "content_in_root": false,
   "domains": ["climate", "sensor"],
   "homeassistant": "2024.1.0",

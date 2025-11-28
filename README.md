@@ -1,4 +1,4 @@
-# Netflame Stove - Home Assistant Integration
+# Netflame Stove - Home Assistant Integration (Unofficial)
 
 Home Assistant integration to control Netflame pellet stoves.
 

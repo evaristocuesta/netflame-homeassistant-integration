@@ -2,8 +2,8 @@
   "config": {
     "step": {
       "user": {
-        "title": "Configure Netflame Stove",
-        "description": "Enter your Netflame stove credentials",
+        "title": "Configure {device}",
+        "description": "Enter credentials for {device} (serial {serial})",
         "data": {
           "serial": "Serial number",
           "password": "Password"
