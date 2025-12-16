@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
+from urllib.parse import quote
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
 from homeassistant.components.climate.const import HVACMode
@@ -86,9 +87,9 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self):
         """Return current preset mode."""
-        potencia = self.coordinator.data.get("power")
-        if potencia:
-            return f"Power {potencia}"
+        power = self.coordinator.data.get("power")
+        if power:
+            return f"Power {power}"
         return None
 
     async def async_set_preset_mode(self, preset_mode: str):
@@ -97,5 +98,40 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
             nivel = int(preset_mode.replace("Power ", ""))
         except Exception:
             return
-        await self.hass.async_add_executor_job(self.api.set_potencia, nivel)
+        await self.hass.async_add_executor_job(self.api.set_power, nivel)
         await self.coordinator.async_request_refresh()
+
+    @property
+    def entity_picture(self) -> str | None:
+        """Return a colored SVG data URI representing the unit status.
+
+        The frontend will show `entity_picture` if present; this provides a
+        small color indicator that changes with the stove state and power.
+        """
+        status = self.coordinator.data.get("status")
+
+        # Map status to colors
+        if status == 0:
+            color = "#9e9e9e"  # Off - gray
+        elif status in (1, 2):
+            color = "#ff9800"  # Turning on/off - orange
+        elif status == 3:
+            color = f"#ff0000"   # On - red
+        else:
+            color = "#9e9e9e"
+
+        svg = (
+            f'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">'
+            f'<circle cx="32" cy="32" r="28" fill="{color}"/></svg>'
+        )
+        return "data:image/svg+xml;utf8," + quote(svg, safe=':/,()?=#&;+-')
+
+    @property
+    def icon(self) -> str:
+        """Return an icon based on current state as a fallback."""
+        status = self.coordinator.data.get("status")
+        if status == 3:
+            return "mdi:fire"
+        if status in (1, 2):
+            return "mdi:fire-alert"
+        return "mdi:fire-off"
