@@ -4,9 +4,9 @@ import logging
 from .const import (
     BASE_URL,
     OP_ONOFF,
-    OP_ESTADO,
-    OP_POTENCIA,
-    OP_ALARMAS,
+    OP_STATUS,
+    OP_POWER,
+    OP_ALARMS,
 )
 
 _LOGGER = logging.getLogger(__name__)
@@ -43,7 +43,7 @@ class NetflameApi:
 
     # Read status (state, temperature, power)
     def get_status(self) -> dict:
-        raw = self._post({"idOperacion": OP_ESTADO})
+        raw = self._post({"idOperacion": OP_STATUS})
 
         status = None
         temperature = None
@@ -74,17 +74,17 @@ class NetflameApi:
         }
 
     # Set power level
-    def set_potencia(self, nivel: int):
-        if nivel < 1 or nivel > 9:
+    def set_power(self, level: int):
+        if level < 1 or level > 9:
             raise ValueError("Power level must be 1..9")
         return self._post({
-            "idOperacion": OP_POTENCIA,
-            "potencia": str(nivel)
+            "idOperacion": OP_POWER,
+            "potencia": str(level)
         })
 
     # Get alarms
     def get_alarms(self):
-        raw = self._post({"idOperacion": OP_ALARMAS})
+        raw = self._post({"idOperacion": OP_ALARMS})
 
         # Split by lines
         lines = [l.strip() for l in raw.split("\n") if l.strip()]
