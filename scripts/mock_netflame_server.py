@@ -1,0 +1,125 @@
+#!/usr/bin/env python3
+"""Lightweight mock server for Netflame.
+
+Usage:
+  python scripts/mock_netflame_server.py [--host HOST] [--port PORT]
+
+Default: HOST=0.0.0.0 PORT=11417
+
+The server accepts POST requests on /recepcion_datos_4.cgi and expects form-encoded
+parameters like idOperacion and others. It returns plain text responses similar to
+what the real Netflame endpoint returns so you can run the integration locally.
+"""
+import argparse
+from http.server import HTTPServer, BaseHTTPRequestHandler
+from urllib.parse import parse_qs
+import logging
+
+LOG = logging.getLogger("mock_netflame")
+LOG.setLevel(logging.INFO)
+LOG.addHandler(logging.StreamHandler())
+
+OP_ONOFF = "1013"
+OP_STATUS = "1002"
+OP_POWER = "1004"
+OP_ALARMS = "1079"
+
+import random
+
+# Mutable mock state
+_STATUS = 1  # 1 = on, 0 = off
+_TEMPERATURE = 23.5
+_POWER = 5
+
+class MockHandler(BaseHTTPRequestHandler):
+    def _send_text(self, text: str, code: int = 200):
+        b = text.encode("utf-8")
+        self.send_response(code)
+        self.send_header("Content-Type", "text/plain; charset=utf-8")
+        self.send_header("Content-Length", str(len(b)))
+        self.end_headers()
+        self.wfile.write(b)
+
+    def do_POST(self):
+        LOG.info("POST %s", self.path)
+        if self.path != "/recepcion_datos_4.cgi":
+            self._send_text("Not Found", 404)
+            return
+
+        length = int(self.headers.get("Content-Length", 0))
+        body = self.rfile.read(length).decode("utf-8")
+        data = parse_qs(body)
+        id_op = data.get("idOperacion", [None])[0]
+
+        LOG.info("idOperacion=%s", id_op)
+
+        # Use globals to persist changes across requests
+        global _STATUS, _TEMPERATURE, _POWER
+
+        if id_op == OP_STATUS:
+            # Change temperature slightly on each status call
+            delta = random.uniform(-0.5, 0.5)
+            _TEMPERATURE = round(_TEMPERATURE + delta, 1)
+            resp = f"estado={_STATUS}\ntemperatura={_TEMPERATURE}\nconsigna_potencia={_POWER}\n"
+            self._send_text(resp)
+            return
+
+        if id_op == OP_ONOFF:
+            # Expect 'on_off' parameter set to '1' or '0'
+            on_off = data.get("on_off", [None])[0]
+            if on_off == "0":
+                _STATUS = 0
+                resp = f"estado={_STATUS}\n"
+            elif on_off == "1":
+                _STATUS = 3
+                resp = f"estado={_STATUS}\n"
+            else:
+                # Toggle if parameter missing or invalid
+                _STATUS = 0 if _STATUS == 3 else 3
+                resp = f"estado={_STATUS}\n"
+            self._send_text(resp)
+            return
+
+        if id_op == OP_POWER:
+            potencia = data.get("potencia", [None])[0]
+            if potencia is not None:
+                try:
+                    _POWER = int(potencia)
+                except Exception:
+                    pass
+            resp = "OK\n"
+            self._send_text(resp)
+            return
+
+        if id_op == OP_ALARMS:
+            # First line contains value, second must be '0' per integration's expectations
+            resp = "alarma=NONE\n0\n"
+            self._send_text(resp)
+            return
+
+        # Unknown operation: echo back keys for debugging
+        resp_lines = [f"{k}={v[0]}" for k, v in data.items()]
+        self._send_text("\n".join(resp_lines) + "\n")
+
+    def log_message(self, format, *args):
+        # Avoid default logging to stderr
+        LOG.info(format % args)
+
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--host", default="0.0.0.0")
+    parser.add_argument("--port", default=11417, type=int)
+    args = parser.parse_args()
+
+    server = HTTPServer((args.host, args.port), MockHandler)
+    LOG.info("Mock Netflame server running at http://%s:%d/recepcion_datos_4.cgi", args.host, args.port)
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        LOG.info("Shutting down")
+        server.server_close()
+
+
+if __name__ == "__main__":
+    main()

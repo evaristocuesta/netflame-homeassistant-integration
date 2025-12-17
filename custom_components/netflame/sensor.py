@@ -98,25 +98,32 @@ class NetflameStatusSensor(NetflameSensorBase):
         super().__init__(coordinator, entry)
         serial = entry.data.get("serial")
         self._attr_name = f"Netflame {serial} Status"
-        self._attr_unique_id = f"netflame_{serial}_estatus"
+        self._attr_unique_id = f"netflame_{serial}_status"
 
     @property
     def native_value(self):
-        """Return the status value."""
-        status = self.coordinator.data.get("status")
+        """Return the numeric status value (0..3)."""
+        return self.coordinator.data.get("status")
 
-        return {
+    @property
+    def extra_state_attributes(self):
+        """Return additional attributes, including a human-readable label."""
+        status = self.coordinator.data.get("status")
+        labels = {
             0: "Off",
             1: "Turning off",
             2: "Turning on",
             3: "On",
-        }.get(status, f"Status {status}")
-    
+        }
+        if status is None:
+            return {}
+        return {"status_label": labels.get(status, f"Status {status}")}
+
     @property
     def icon(self):
         status = self.coordinator.data.get("status")
         
-        if status in (2, 3):
+        if status > 1:
             return "mdi:fire"
         
         return "mdi:fire-off"
