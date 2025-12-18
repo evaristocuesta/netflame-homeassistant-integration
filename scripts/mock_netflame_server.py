@@ -14,6 +14,7 @@ import argparse
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from urllib.parse import parse_qs
 import logging
+import threading
 
 LOG = logging.getLogger("mock_netflame")
 LOG.setLevel(logging.INFO)
@@ -30,6 +31,43 @@ import random
 _STATUS = 1  # 1 = on, 0 = off
 _TEMPERATURE = 23.5
 _POWER = 5
+
+# Lock and timer to manage delayed transitions (e.g., 2 -> 3, 1 -> 0)
+_STATE_LOCK = threading.Lock()
+_transition_timer = None
+# Default transition delay in seconds; configurable via CLI --transition-delay
+TRANSITION_DELAY = 20.0
+
+def _schedule_transition(intermediate_status, final_status, delay=None):
+    """Set intermediate status immediately and schedule final_status after delay seconds.
+
+    If `delay` is None, uses the module-level `TRANSITION_DELAY` value so this
+    behavior can be configured at startup.
+    """
+    global _STATUS, _transition_timer
+    if delay is None:
+        delay = TRANSITION_DELAY
+    with _STATE_LOCK:
+        # cancel any pending transition
+        if _transition_timer is not None:
+            try:
+                _transition_timer.cancel()
+            except Exception:
+                pass
+            _transition_timer = None
+        _STATUS = intermediate_status
+        LOG.info("Scheduled state change: %s -> %s in %s seconds", intermediate_status, final_status, delay)
+
+        def _do_final():
+            global _STATUS, _transition_timer
+            with _STATE_LOCK:
+                _STATUS = final_status
+                _transition_timer = None
+            LOG.info("State transitioned to %s", final_status)
+
+        _transition_timer = threading.Timer(delay, _do_final)
+        _transition_timer.daemon = True
+        _transition_timer.start()
 
 class MockHandler(BaseHTTPRequestHandler):
     def _send_text(self, text: str, code: int = 200):
@@ -68,14 +106,19 @@ class MockHandler(BaseHTTPRequestHandler):
             # Expect 'on_off' parameter set to '1' or '0'
             on_off = data.get("on_off", [None])[0]
             if on_off == "0":
-                _STATUS = 0
+                # Transition: set to '1' (turning off) for TRANSITION_DELAY then to '0' (off)
+                _schedule_transition(1, 0)
                 resp = f"estado={_STATUS}\n"
             elif on_off == "1":
-                _STATUS = 3
+                # Transition: set to '2' (turning on) for TRANSITION_DELAY then to '3' (on)
+                _schedule_transition(2, 3)
                 resp = f"estado={_STATUS}\n"
             else:
-                # Toggle if parameter missing or invalid
-                _STATUS = 0 if _STATUS == 3 else 3
+                # Toggle if parameter missing or invalid: schedule opposite transition
+                if _STATUS == 2 or _STATUS == 3:
+                    _schedule_transition(1, 0)
+                else:
+                    _schedule_transition(2, 3)
                 resp = f"estado={_STATUS}\n"
             self._send_text(resp)
             return
@@ -110,10 +153,18 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--host", default="0.0.0.0")
     parser.add_argument("--port", default=11417, type=int)
+    parser.add_argument("--transition-delay", type=float, default=None,
+                        help="Delay in seconds for intermediate->final state transitions (default: 20)")
     args = parser.parse_args()
+
+    # Allow CLI to override default transition delay
+    global TRANSITION_DELAY
+    if args.transition_delay is not None:
+        TRANSITION_DELAY = float(args.transition_delay)
 
     server = HTTPServer((args.host, args.port), MockHandler)
     LOG.info("Mock Netflame server running at http://%s:%d/recepcion_datos_4.cgi", args.host, args.port)
+    LOG.info("Using transition delay: %s seconds", TRANSITION_DELAY)
     try:
         server.serve_forever()
     except KeyboardInterrupt:

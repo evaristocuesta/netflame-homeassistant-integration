@@ -27,6 +27,11 @@ def _load_mock_module():
 @pytest.fixture(scope="function")
 def mock_server_module():
     module = _load_mock_module()
+
+    # Speed up scheduled transitions for tests (20s -> 0.1s) by overriding TRANSITION_DELAY
+    orig_delay = getattr(module, "TRANSITION_DELAY", None)
+    module.TRANSITION_DELAY = 0.1
+
     server = HTTPServer(("127.0.0.1", 0), module.MockHandler)
     host, port = server.server_address
     thread = threading.Thread(target=server.serve_forever, daemon=True)
@@ -35,6 +40,10 @@ def mock_server_module():
     base_url = f"http://{host}:{port}/recepcion_datos_4.cgi"
 
     yield module, base_url
+
+    # Restore original TRANSITION_DELAY if present
+    if orig_delay is not None:
+        module.TRANSITION_DELAY = orig_delay
 
     server.shutdown()
     server.server_close()
@@ -69,28 +78,47 @@ def test_onoff_sets_and_toggles_state(mock_server_module):
     # initial status should be 1
     assert module._STATUS == 1
 
-    # Explicitly set to 0
-    r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "0"}, timeout=1)
-    r.raise_for_status()
-    assert "estado=0" in r.text
-    assert module._STATUS == 0
-
-    # Toggle by calling without on_off -> should become 3
-    r = requests.post(base_url, data={"idOperacion": "1013"}, timeout=1)
-    r.raise_for_status()
-    assert "estado=3" in r.text
-    assert module._STATUS == 3
-
-    # Explicitly set to 1 (idempotent) and then toggle -> should become 0
+    # Turn ON: should enter intermediate state 2 immediately, then final 3 shortly
     r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "1"}, timeout=1)
     r.raise_for_status()
-    assert "estado=3" in r.text
+    # Response should reflect the intermediate status (2)
+    assert "estado=2" in r.text
+    assert module._STATUS == 2
+
+    # Wait for the scheduled final transition (fastened to 0.1s in fixture)
+    time.sleep(0.2)
+    r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
+    r.raise_for_status()
+    kv = dict(line.split("=", 1) for line in r.text.splitlines() if "=" in line)
+    assert int(kv.get("estado", -1)) == 3
     assert module._STATUS == 3
 
+    # Turn OFF: should enter intermediate state 1 immediately, then final 0 shortly
+    r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "0"}, timeout=1)
+    r.raise_for_status()
+    assert "estado=1" in r.text
+    assert module._STATUS == 1
+
+    time.sleep(0.2)
+    r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
+    r.raise_for_status()
+    kv = dict(line.split("=", 1) for line in r.text.splitlines() if "=" in line)
+    assert int(kv.get("estado", -1)) == 0
+    assert module._STATUS == 0
+
+    # Toggle without on_off should schedule the opposite transition depending on current state
     r = requests.post(base_url, data={"idOperacion": "1013"}, timeout=1)
     r.raise_for_status()
-    assert "estado=0" in r.text
-    assert module._STATUS == 0
+    # Since we were 0, toggling should schedule 2 -> 3 and return intermediate 2
+    assert "estado=2" in r.text
+    assert module._STATUS == 2
+
+    time.sleep(0.2)
+    r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
+    r.raise_for_status()
+    kv = dict(line.split("=", 1) for line in r.text.splitlines() if "=" in line)
+    assert int(kv.get("estado", -1)) == 3
+    assert module._STATUS == 3
 
 
 def test_power_sets_value_and_status_reflects_it(mock_server_module):
