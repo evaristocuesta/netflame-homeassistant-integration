@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
-from urllib.parse import quote
+from .utils import status_svg_data_uri
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
 from homeassistant.components.climate.const import HVACMode
@@ -103,28 +103,23 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
 
     @property
     def entity_picture(self) -> str | None:
-        """Return a colored SVG data URI representing the unit status.
-
-        The frontend will show `entity_picture` if present; this provides a
-        small color indicator that changes with the stove state and power.
-        """
+        """Return a colored SVG data URI representing the unit status."""
         status = self.coordinator.data.get("status")
+        return status_svg_data_uri(status, size=64)
 
-        # Map status to colors
-        if status == 0:
-            color = "#9e9e9e"  # Off - gray
-        elif status in (1, 2):
-            color = "#ff9800"  # Turning on/off - orange
-        elif status == 3:
-            color = f"#ff0000"   # On - red
-        else:
-            color = "#9e9e9e"
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return additional attributes for the climate entity.
 
-        svg = (
-            f'<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64">'
-            f'<circle cx="32" cy="32" r="28" fill="{color}"/></svg>'
-        )
-        return "data:image/svg+xml;utf8," + quote(svg, safe=':/,()?=#&;+-')
+        Expose the generated `entity_picture` explicitly so it is visible in
+        Developer Tools and in places where the frontend doesn't automatically
+        show the `entity_picture` property for climate entities.
+        """
+        pic = self.entity_picture
+        attrs = {}
+        if pic:
+            attrs["entity_picture"] = pic
+        return attrs
 
     @property
     def icon(self) -> str:

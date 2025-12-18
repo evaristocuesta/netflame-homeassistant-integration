@@ -8,6 +8,7 @@ from homeassistant.helpers.entity import DeviceInfo
 import logging
 
 from .const import DOMAIN
+from .utils import status_svg_data_uri
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,6 +26,7 @@ async def async_setup_entry(
     async_add_entities([
         NetflameTempSensor(coordinator, entry),
         NetflameAlarmSensor(coordinator, entry),
+        NetflamePowerSensor(coordinator, entry),
         NetflameStatusSensor(coordinator, entry),
     ], True)
 
@@ -88,6 +90,34 @@ class NetflameAlarmSensor(NetflameSensorBase):
             return alarms.strip()
         return None
     
+    @property
+    def icon(self) -> str:
+        """Return an icon based on current alarm."""
+        alarms = self.coordinator.data.get("alarms")
+        if alarms == "NONE":
+            return "mdi:check-circle"
+
+        return "mdi:alert"
+
+
+class NetflamePowerSensor(NetflameSensorBase):
+    """Netflame Power Sensor."""
+
+    _attr_icon = "mdi:gauge"
+
+    def __init__(self, coordinator, entry):
+        """Initialize the power sensor."""
+        super().__init__(coordinator, entry)
+        serial = entry.data.get("serial")
+        self._attr_name = f"Netflame {serial} Power"
+        self._attr_unique_id = f"netflame_{serial}_power"
+
+    @property
+    def native_value(self):
+        """Return the current power setting (int)."""
+        return self.coordinator.data.get("power")
+
+
 class NetflameStatusSensor(NetflameSensorBase):
     """Netflame Status Sensor."""
 
@@ -120,10 +150,17 @@ class NetflameStatusSensor(NetflameSensorBase):
         return {"status_label": labels.get(status, f"Status {status}")}
 
     @property
-    def icon(self):
+    def entity_picture(self) -> str | None:
+        """Return a small colored SVG data URI representing the status."""
         status = self.coordinator.data.get("status")
-        
-        if status > 1:
+        return status_svg_data_uri(status, size=32)
+
+    @property
+    def icon(self) -> str:
+        """Return an icon based on current state as a fallback."""
+        status = self.coordinator.data.get("status")
+        if status == 3:
             return "mdi:fire"
-        
+        if status in (1, 2):
+            return "mdi:fire-alert"
         return "mdi:fire-off"
