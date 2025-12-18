@@ -5,11 +5,12 @@ Home Assistant integration to control Netflame pellet stoves.
 ## Features
 
 - On/off control
+- Status reading
 - Temperature reading
 - Power control (levels 1-9)
 - Alarm reading
 - Climate entity for HVAC mode and power presets
-- Sensors for temperature and alarms
+- Sensors for temperature, alarms, status and power
 
 ## Installation
 
