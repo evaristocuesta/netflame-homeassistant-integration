@@ -135,6 +135,14 @@ def test_get_alarms_parsing():
     assert api3.get_alarms() == "FOO"
 
 
+def test_uses_custom_base_url():
+    sess = DummySession()
+    custom = "http://example.test/recepcion_datos_4.cgi"
+    api = NetflameApi("u", "p", session=sess, base_url=custom)
+    api.get_status()
+    assert sess.last["url"] == custom
+
+
 @pytest.fixture(scope="function")
 def mock_server_module_local():
     # Duplicate of the mock_server_module fixture used elsewhere so this test file can use it

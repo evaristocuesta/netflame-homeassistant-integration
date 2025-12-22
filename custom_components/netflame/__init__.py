@@ -2,7 +2,7 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.typing import ConfigType
 
-from .const import DOMAIN
+from .const import DOMAIN, BASE_URL
 from .api import NetflameApi
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator
 import logging
@@ -22,8 +22,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry):
     hass.data.setdefault(DOMAIN, {})
     username = entry.data["serial"]
     password = entry.data["password"]
+    base_url = entry.data.get("url", BASE_URL)
 
-    api = NetflameApi(username, password)
+    api = NetflameApi(username, password, base_url=base_url)
 
     async def _update():
         # All blocking calls run in executor

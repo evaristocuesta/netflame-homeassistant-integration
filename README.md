@@ -36,6 +36,7 @@ git clone https://github.com/evaristocuesta/netflame-homeassistant-integration.g
 You will need to provide:
 - **Serial**: Serial number of your Netflame stove
 - **Password**: Access password for the stove
+- **URL**: Server URL to which the integration sends requests (optional; defaults to the library's built-in URL)
 
 ## Requirements
 

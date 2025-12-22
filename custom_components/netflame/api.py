@@ -12,18 +12,20 @@ from .const import (
 _LOGGER = logging.getLogger(__name__)
 
 class NetflameApi:
-    def __init__(self, username: str, password: str, session: requests.Session = None):
+    def __init__(self, username: str, password: str, session: requests.Session = None, base_url: str = None):
         self.username = username
         self.password = password
         self.session = session or requests.Session()
         # Keep verify False by default because many Netflame endpoints have old certs;
         # administrators should change to True and provide certs if possible.
         self.session.verify = False
+        # Allow per-instance base URL (configurable from integration)
+        self.base_url = base_url or BASE_URL
 
     def _post(self, data: dict) -> str:
         try:
             r = self.session.post(
-                BASE_URL,
+                self.base_url,
                 auth=(self.username, self.password),
                 data=data,
                 timeout=10
