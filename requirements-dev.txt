@@ -1,0 +1,2 @@
+# Development dependencies for tests and local development
+pytest>=7.2,<9
