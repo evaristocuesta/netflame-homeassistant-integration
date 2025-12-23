@@ -3,10 +3,11 @@
     "step": {
       "user": {
         "title": "Configurar {device}",
-        "description": "Ingresa las credenciales de {device} (serie {serial})",
+        "description": "Ingresa las credenciales y la URL del servidor de {device} (serie {serial})",
         "data": {
           "serial": "Número de serie",
-          "password": "Contraseña"
+          "password": "Contraseña",
+          "url": "URL del servidor"
         }
       }
     },

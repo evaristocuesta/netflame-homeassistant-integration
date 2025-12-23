@@ -12,14 +12,8 @@ By default it runs on `0.0.0.0:11417`.
 
 ## Usage with the integration
 
-In `custom_components/netflame/const.py` comment out the original `BASE_URL` line that points to the production server and add a local URL. Example:
+Configure the Netflame integration through the Home Assistant UI: when adding the integration, enter the Base URL (for the local mock use `http://127.0.0.1:11417/` or the host/port you're running the mock on), and provide the device serial number and password when prompted. 
 
-```python
-# BASE_URL = "https://easynet9.netflamehome.com:11417/recepcion_datos_4.cgi"  # original production URL (commented during local dev)
-BASE_URL = "http://127.0.0.1:11417/recepcion_datos_4.cgi"  # local mock
-```
-
-The component will POST to the mock server instead of the remote one.
 ## Behavior
 
 The mock recognizes these `idOperacion` values and returns simple, predictable responses:

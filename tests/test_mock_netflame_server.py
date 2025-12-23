@@ -37,7 +37,7 @@ def mock_server_module():
     thread = threading.Thread(target=server.serve_forever, daemon=True)
     thread.start()
 
-    base_url = f"http://{host}:{port}/recepcion_datos_4.cgi"
+    base_url = f"http://{host}:{port}/"
 
     yield module, base_url
 
@@ -75,8 +75,8 @@ def test_status_temperature_and_power_change(mock_server_module):
 def test_onoff_sets_and_toggles_state(mock_server_module):
     module, base_url = mock_server_module
 
-    # initial status should be 1
-    assert module._STATUS == 1
+    # initial status should be 0
+    assert module._STATUS == 0
 
     # Turn ON: should enter intermediate state 2 immediately, then final 3 shortly
     r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "1"}, timeout=1)

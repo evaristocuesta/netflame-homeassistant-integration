@@ -6,7 +6,7 @@ Usage:
 
 Default: HOST=0.0.0.0 PORT=11417
 
-The server accepts POST requests on /recepcion_datos_4.cgi and expects form-encoded
+The server accepts POST requests and expects form-encoded
 parameters like idOperacion and others. It returns plain text responses similar to
 what the real Netflame endpoint returns so you can run the integration locally.
 """
@@ -28,7 +28,7 @@ OP_ALARMS = "1079"
 import random
 
 # Mutable mock state
-_STATUS = 1  # 1 = on, 0 = off
+_STATUS = 0  # 0 = off, 1 = turning off, 2 = turning on, 3 = on, 
 _TEMPERATURE = 23.5
 _POWER = 5
 
@@ -80,9 +80,6 @@ class MockHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         LOG.info("POST %s", self.path)
-        if self.path != "/recepcion_datos_4.cgi":
-            self._send_text("Not Found", 404)
-            return
 
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length).decode("utf-8")
@@ -163,7 +160,7 @@ def main():
         TRANSITION_DELAY = float(args.transition_delay)
 
     server = HTTPServer((args.host, args.port), MockHandler)
-    LOG.info("Mock Netflame server running at http://%s:%d/recepcion_datos_4.cgi", args.host, args.port)
+    LOG.info("Mock Netflame server running at http://%s:%d/", args.host, args.port)
     LOG.info("Using transition delay: %s seconds", TRANSITION_DELAY)
     try:
         server.serve_forever()
