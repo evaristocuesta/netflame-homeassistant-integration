@@ -137,7 +137,7 @@ def test_get_alarms_parsing():
 
 def test_uses_custom_base_url():
     sess = DummySession()
-    custom = "http://example.test/recepcion_datos_4.cgi"
+    custom = "http://example.test/"
     api = NetflameApi("u", "p", session=sess, base_url=custom)
     api.get_status()
     assert sess.last["url"] == custom
@@ -156,7 +156,7 @@ def mock_server_module_local():
     orig_delay = getattr(module, "TRANSITION_DELAY", None)
     module.TRANSITION_DELAY = 0.1
 
-    base_url = f"http://{host}:{port}/recepcion_datos_4.cgi"
+    base_url = f"http://{host}:{port}/"
 
     yield module, base_url
 
