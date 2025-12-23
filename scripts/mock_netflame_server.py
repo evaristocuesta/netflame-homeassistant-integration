@@ -80,9 +80,6 @@ class MockHandler(BaseHTTPRequestHandler):
 
     def do_POST(self):
         LOG.info("POST %s", self.path)
-        if self.path != "/recepcion_datos_4.cgi":
-            self._send_text("Not Found", 404)
-            return
 
         length = int(self.headers.get("Content-Length", 0))
         body = self.rfile.read(length).decode("utf-8")
