@@ -94,7 +94,7 @@ class NetflameAlarmSensor(NetflameSensorBase):
     def icon(self) -> str:
         """Return an icon based on current alarm."""
         alarms = self.coordinator.data.get("alarms")
-        if alarms == "NONE":
+        if alarms == "N":
             return "mdi:check-circle"
 
         return "mdi:alert"

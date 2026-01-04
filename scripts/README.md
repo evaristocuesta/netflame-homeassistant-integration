@@ -21,7 +21,7 @@ The mock recognizes these `idOperacion` values and returns simple, predictable r
 - `1002` (status): returns lines `estado=1`, `temperatura=23.5`, `consigna_potencia=5`
 - `1013` (on/off): returns `OK` (see state transition details below)
 - `1004` (set power): returns `OK`
-- `1079` (alarms): returns `alarma=NONE` and `0` on the following line (to match `get_alarms()` expectations)
+- `1079` (alarms): returns `alarma=N` and `0` on the following line (to match `get_alarms()` expectations)
 
 If an unknown operation is sent, the mock echoes back the form keys and values for debugging.
 
