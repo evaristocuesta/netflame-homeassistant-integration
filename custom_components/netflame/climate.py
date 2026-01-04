@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 from datetime import timedelta
+from .utils import status_svg_data_uri
 
 from homeassistant.components.climate import ClimateEntity, ClimateEntityFeature
 from homeassistant.components.climate.const import HVACMode
@@ -71,7 +72,7 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self):
         """Return current HVAC mode."""
         estado = self.coordinator.data.get("status")
-        if estado in (0, 1):
+        if estado in (0, 1, 8, 9, 11, 20, -2, -3, -4, -20):
             return HVACMode.OFF
         return HVACMode.HEAT
 
@@ -86,9 +87,9 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     @property
     def preset_mode(self):
         """Return current preset mode."""
-        potencia = self.coordinator.data.get("power")
-        if potencia:
-            return f"Power {potencia}"
+        power = self.coordinator.data.get("power")
+        if power:
+            return f"Power {power}"
         return None
 
     async def async_set_preset_mode(self, preset_mode: str):
@@ -97,5 +98,35 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
             nivel = int(preset_mode.replace("Power ", ""))
         except Exception:
             return
-        await self.hass.async_add_executor_job(self.api.set_potencia, nivel)
+        await self.hass.async_add_executor_job(self.api.set_power, nivel)
         await self.coordinator.async_request_refresh()
+
+    @property
+    def entity_picture(self) -> str | None:
+        """Return a colored SVG data URI representing the unit status."""
+        status = self.coordinator.data.get("status")
+        return status_svg_data_uri(status, size=64)
+
+    @property
+    def extra_state_attributes(self) -> dict:
+        """Return additional attributes for the climate entity.
+
+        Expose the generated `entity_picture` explicitly so it is visible in
+        Developer Tools and in places where the frontend doesn't automatically
+        show the `entity_picture` property for climate entities.
+        """
+        pic = self.entity_picture
+        attrs = {}
+        if pic:
+            attrs["entity_picture"] = pic
+        return attrs
+
+    @property
+    def icon(self) -> str:
+        """Return an icon based on current state as a fallback."""
+        status = self.coordinator.data.get("status")
+        if status in (1, 2, 3, 4, 10, 5, 6, 7):
+            return "mdi:fire"
+        if status == -4:
+            return "mdi:fire-alert"
+        return "mdi:fire-off"

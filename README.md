@@ -5,11 +5,12 @@ Home Assistant integration to control Netflame pellet stoves.
 ## Features
 
 - On/off control
+- Status reading
 - Temperature reading
 - Power control (levels 1-9)
 - Alarm reading
 - Climate entity for HVAC mode and power presets
-- Sensors for temperature and alarms
+- Sensors for temperature, alarms, status and power
 
 ## Installation
 
@@ -35,6 +36,7 @@ git clone https://github.com/evaristocuesta/netflame-homeassistant-integration.g
 You will need to provide:
 - **Serial**: Serial number of your Netflame stove
 - **Password**: Access password for the stove
+- **URL**: Server URL to which the integration sends requests (optional; defaults to the library's built-in URL)
 
 ## Requirements
 
