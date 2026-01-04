@@ -185,14 +185,14 @@ def test_integration_with_mock_server_status_and_power(mock_server_module_local)
     st2 = api.get_status()
     assert st2["power"] == 7
 
-    # turn_on should schedule intermediate 2 then final 3; fixture fastens delay
+    # turn_on should schedule intermediate 2 then final 7; fixture fastens delay
     module._STATUS = 1
     api.turn_on()
     st3 = api.get_status()
     assert st3["status"] == 2
     time.sleep(0.2)
     st4 = api.get_status()
-    assert st4["status"] == 3
+    assert st4["status"] == 7
 
     # Restore BASE_URL
     api_mod.BASE_URL = orig_base

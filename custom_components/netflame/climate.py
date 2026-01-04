@@ -72,7 +72,7 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     def hvac_mode(self):
         """Return current HVAC mode."""
         estado = self.coordinator.data.get("status")
-        if estado in (0, 1):
+        if estado in (0, 1, 8, 9, 11, 20, -2, -3, -4, -20):
             return HVACMode.OFF
         return HVACMode.HEAT
 
@@ -125,8 +125,8 @@ class NetflameClimate(CoordinatorEntity, ClimateEntity):
     def icon(self) -> str:
         """Return an icon based on current state as a fallback."""
         status = self.coordinator.data.get("status")
-        if status == 3:
+        if status in (1, 2, 3, 4, 10, 5, 6, 7):
             return "mdi:fire"
-        if status in (1, 2):
+        if status == -4:
             return "mdi:fire-alert"
         return "mdi:fire-off"

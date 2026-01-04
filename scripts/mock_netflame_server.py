@@ -104,18 +104,18 @@ class MockHandler(BaseHTTPRequestHandler):
             on_off = data.get("on_off", [None])[0]
             if on_off == "0":
                 # Transition: set to '1' (turning off) for TRANSITION_DELAY then to '0' (off)
-                _schedule_transition(1, 0)
+                _schedule_transition(8, 0)
                 resp = f"estado={_STATUS}\n"
             elif on_off == "1":
                 # Transition: set to '2' (turning on) for TRANSITION_DELAY then to '3' (on)
-                _schedule_transition(2, 3)
+                _schedule_transition(2, 7)
                 resp = f"estado={_STATUS}\n"
             else:
                 # Toggle if parameter missing or invalid: schedule opposite transition
-                if _STATUS == 2 or _STATUS == 3:
-                    _schedule_transition(1, 0)
+                if _STATUS == 7:
+                    _schedule_transition(8, 0)
                 else:
-                    _schedule_transition(2, 3)
+                    _schedule_transition(2, 7)
                 resp = f"estado={_STATUS}\n"
             self._send_text(resp)
             return

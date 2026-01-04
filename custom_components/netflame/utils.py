@@ -27,17 +27,29 @@ def get_status_color(status: Optional[int]) -> str:
     """Return a color hex string for a given status.
 
     Mapping is:
-    - 0 -> gray (#9e9e9e)
-    - 1,2 -> orange (#ff9800)
-    - 3 -> red (#ff0000)
+    - 0 -> red (#ff0000)
+    - 1, 2, 3, 4, 10 -> yellow (#ffff00)
+    - 5, 6 -> sky blue (#b2ffff)
+    - 7 -> green (#00ff00)
+    - 8, 11, -3 white (#ffffff)
+    - -20 blue (#0000ff)
+    - -4 orange (#ffa500)
     Any unknown -> gray
     """
-    if status == 0:
-        return "#9e9e9e"
-    if status in (1, 2):
-        return "#ff9800"
-    if status == 3:
+    if status in (0, 1):
         return "#ff0000"
+    if status in (2, 3, 4, 10):
+        return "#ffff00"
+    if status in (5, 6):
+        return "#b2ffff"
+    if status == 7:
+        return "#00ff00"
+    if status in (8, 9, 11, -2, -3):
+        return "#ffffff"
+    if status in (20, -20):
+        return "#0000ff"
+    if status in (-3, -4):
+        return "#ffa500"
     return "#9e9e9e"
 
 

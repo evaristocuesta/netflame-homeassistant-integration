@@ -136,31 +136,7 @@ class NetflameStatusSensor(NetflameSensorBase):
         return self.coordinator.data.get("status")
 
     @property
-    def extra_state_attributes(self):
-        """Return additional attributes, including a human-readable label."""
-        status = self.coordinator.data.get("status")
-        labels = {
-            0: "Off",
-            1: "Turning off",
-            2: "Turning on",
-            3: "On",
-        }
-        if status is None:
-            return {}
-        return {"status_label": labels.get(status, f"Status {status}")}
-
-    @property
     def entity_picture(self) -> str | None:
         """Return a small colored SVG data URI representing the status."""
         status = self.coordinator.data.get("status")
         return status_svg_data_uri(status, size=32)
-
-    @property
-    def icon(self) -> str:
-        """Return an icon based on current state as a fallback."""
-        status = self.coordinator.data.get("status")
-        if status == 3:
-            return "mdi:fire"
-        if status in (1, 2):
-            return "mdi:fire-alert"
-        return "mdi:fire-off"

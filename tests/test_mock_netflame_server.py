@@ -78,7 +78,7 @@ def test_onoff_sets_and_toggles_state(mock_server_module):
     # initial status should be 0
     assert module._STATUS == 0
 
-    # Turn ON: should enter intermediate state 2 immediately, then final 3 shortly
+    # Turn ON: should enter intermediate state 2 immediately, then final 7 shortly
     r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "1"}, timeout=1)
     r.raise_for_status()
     # Response should reflect the intermediate status (2)
@@ -90,14 +90,14 @@ def test_onoff_sets_and_toggles_state(mock_server_module):
     r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
     r.raise_for_status()
     kv = dict(line.split("=", 1) for line in r.text.splitlines() if "=" in line)
-    assert int(kv.get("estado", -1)) == 3
-    assert module._STATUS == 3
+    assert int(kv.get("estado", -1)) == 7
+    assert module._STATUS == 7
 
-    # Turn OFF: should enter intermediate state 1 immediately, then final 0 shortly
+    # Turn OFF: should enter intermediate state 8 immediately, then final 0 shortly
     r = requests.post(base_url, data={"idOperacion": "1013", "on_off": "0"}, timeout=1)
     r.raise_for_status()
-    assert "estado=1" in r.text
-    assert module._STATUS == 1
+    assert "estado=8" in r.text
+    assert module._STATUS == 8
 
     time.sleep(0.2)
     r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
@@ -109,7 +109,7 @@ def test_onoff_sets_and_toggles_state(mock_server_module):
     # Toggle without on_off should schedule the opposite transition depending on current state
     r = requests.post(base_url, data={"idOperacion": "1013"}, timeout=1)
     r.raise_for_status()
-    # Since we were 0, toggling should schedule 2 -> 3 and return intermediate 2
+    # Since we were 0, toggling should schedule 2 -> 7 and return intermediate 2
     assert "estado=2" in r.text
     assert module._STATUS == 2
 
@@ -117,8 +117,8 @@ def test_onoff_sets_and_toggles_state(mock_server_module):
     r = requests.post(base_url, data={"idOperacion": "1002"}, timeout=1)
     r.raise_for_status()
     kv = dict(line.split("=", 1) for line in r.text.splitlines() if "=" in line)
-    assert int(kv.get("estado", -1)) == 3
-    assert module._STATUS == 3
+    assert int(kv.get("estado", -1)) == 7
+    assert module._STATUS == 7
 
 
 def test_power_sets_value_and_status_reflects_it(mock_server_module):
