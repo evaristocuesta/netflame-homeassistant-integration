@@ -147,7 +147,7 @@ def test_alarms_return_two_lines(mock_server_module):
         _, val = lines[0].split("=", 1)
     else:
         val = lines[0]
-    assert val == "NONE"
+    assert val == "N"
 
 
 def test_unknown_operation_echoes_back(mock_server_module):

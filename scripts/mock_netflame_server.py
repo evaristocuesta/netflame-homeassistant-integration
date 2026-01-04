@@ -133,7 +133,7 @@ class MockHandler(BaseHTTPRequestHandler):
 
         if id_op == OP_ALARMS:
             # First line contains value, second must be '0' per integration's expectations
-            resp = "alarma=NONE\n0\n"
+            resp = "alarma=N\n0\n"
             self._send_text(resp)
             return
 

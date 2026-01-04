@@ -120,12 +120,12 @@ def test_set_power_validation_and_payload():
 
 def test_get_alarms_parsing():
     # Normal case
-    sess = DummySession(response_text="alarma=NONE\n0\n")
+    sess = DummySession(response_text="alarma=N\n0\n")
     api = NetflameApi("u", "p", session=sess)
-    assert api.get_alarms() == "NONE"
+    assert api.get_alarms() == "N"
 
     # Second line not 0 -> None
-    sess2 = DummySession(response_text="alarma=NONE\n1\n")
+    sess2 = DummySession(response_text="alarma=N\n1\n")
     api2 = NetflameApi("u", "p", session=sess2)
     assert api2.get_alarms() is None
 
